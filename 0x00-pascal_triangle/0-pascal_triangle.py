@@ -1,23 +1,25 @@
 #!/usr/bin/python3
-'''Module to return pascal triangle'''
+"""
+given an integer, the function in this module creates
+an array of array representing a pascal triangle levels = the integer
+"""
 
 
 def pascal_triangle(n):
-    '''
-    Pascal's triangle
-    Args:
-      n (int): The number of rows of the triangle
-    Returns:
-      List of lists of integers representing the Pascal’s triangle
-    '''
-    lists = []
-    if n == 0:
-        return lists
+    """ creates a pascal triangle of size n """
+    lst = []
+    if n <= 0:
+        return lst
+
     for i in range(n):
-        lists.append([])
-        lists[i].append(1)
-        if (i > 0):
-            for j in range(1, i):
-                lists[i].append(lists[i - 1][j - 1] + lists[i - 1][j])
-            lists[i].append(1)
-    return lists
+        child = [1]
+        for j in range(i):
+            res = 0
+            j = j + 1
+            res = lst[i - 1][j - 1]
+            if j < i:
+                res += lst[i - 1][j]
+            child.append(res)
+        lst.append(child)
+
+    return lst
