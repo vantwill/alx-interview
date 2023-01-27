@@ -13,17 +13,17 @@ def pascal_triangle(n):
 
     idx = 0
     while (idx < n):
-        i = 0
+        j = 0
         child = []
-        while (i <= idx):
-            if i == 0:
+        while (j <= idx):
+            if j == 0:
                 child.append(1)
             else:
-                res = lst[idx - 1][i - 1]
-                if i < idx:
-                    res += lst[idx - 1][i]
+                res = lst[idx - 1][j - 1]
+                if j < idx:
+                    res += lst[idx - 1][j]
                 child.append(res)
-            i += 1
+            j += 1
         lst.append(child)
         idx += 1
 
