@@ -32,9 +32,9 @@ def canUnlockAll(boxes):
     return check_boxes_dict(boxes_dict)
 
 
-def check_boxes_dict(bxs_dct):
+def check_boxes_dict(bx_dt):
     """ checks if all boxes are unlocked """
-    for box in bxs_dct:
-        if not bxs_dct[box]:
+    for box in bx_dt:
+        if not bx_dt[box]:
             return False
     return True
