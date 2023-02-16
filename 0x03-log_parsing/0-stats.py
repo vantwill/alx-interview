@@ -1,35 +1,46 @@
 #!/usr/bin/python3
-"""log parsing"""
+""" parses logs """
+
+
 import sys
 
 
-def print_data(total_file_size, status_code_data):
-    """prints total size and status code count"""
-    print('File size: {}'.format(total_file_size))
-    for k, v in sorted(status_code_data.items()):
-        if v != 0:
-            print('{}: {}'.format(k, v))
+def main():
+    """ main func """
+    total_file_size = 0
+    status_codes_count_map = {"200": 0, "301": 0, "400": 0, "401": 0,
+                              "403": 0, "404": 0, "405": 0, "500": 0}
+    try:
+        count = 0
+        for line in sys.stdin:
+            count += 1
+            tokens = line.split()
+            if len(tokens):
+                try:
+                    total_file_size += int(tokens[-1])
+                    status_codes_count_map[tokens[-2]] += 1
+                except Exception:
+                    pass
+                if count == 10:
+                    count = 0
+                    print_report(
+                        status_codes_count_map,
+                        total_file_size
+                    )
+        print_report(status_codes_count_map, total_file_size)
+
+    except KeyboardInterrupt:
+        print_report(status_codes_count_map, total_file_size)
+        raise
 
 
-status_codes = ['200', '301', '400', '401', '403', '404', '405', '500']
-status_code_data = {code: 0 for code in status_codes}
-total_file_size = 0
-try:
-    count = 0
-    for line in sys.stdin:
-        splitstr = line.split()
-        try:
-            total_file_size += int(splitstr[-1])
-            code = splitstr[-2]
-            if code in status_code_data:
-                count += 1
-                status_code_data[code] += 1
-                if count % 10 == 0:
-                    print_data(total_file_size, status_code_data)
-        except:
-            pass
-except KeyboardInterrupt:
-    print_data(total_file_size, status_code_data)
-    raise
-else:
-    print_data(total_file_size, status_code_data)
+def print_report(dct_, file_size):
+    """ prints to stdout summary of logs """
+    print("File size: {}".format(file_size))
+    for key in sorted(dct_.keys()):
+        if dct_.get(key):
+            print("{}: {}".format(key, dct_[key]))
+
+
+if __name__ == "__main__":
+    main()
