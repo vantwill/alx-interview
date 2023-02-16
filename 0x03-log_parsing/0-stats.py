@@ -1,40 +1,47 @@
 #!/usr/bin/python3
-"""Performs log parsing from stdin"""
+""" script that reads stdin line by line and computes metrics """
 
-import re
-import sys
-counter = 0
-file_size = 0
-statusC_counter = {200: 0, 301: 0, 400: 0,
-                   401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
+if __name__ == '__main__':
 
+    import sys
 
-def printCodes(dict, file_s):
-    """Prints the status code and the number of times they appear"""
-    print("File size: {}".format(file_s))
-    for key in sorted(dict.keys()):
-        if statusC_counter[key] != 0:
-            print("{}: {}".format(key, dict[key]))
+    def print_results(statusCodes, fileSize):
+        """ printing function with well formated """
+        print("File size: {:d}".format(fileSize))
+        for statusCode, times in sorted(statusCodes.items()):
+            if times:
+                print("{:s}: {:d}".format(statusCode, times))
 
+    statusCodes = {"200": 0,
+                   "301": 0,
+                   "400": 0,
+                   "401": 0,
+                   "403": 0,
+                   "404": 0,
+                   "405": 0,
+                   "500": 0
+                   }
+    fileSize = 0
+    n_lines = 0
 
-if __name__ == "__main__":
     try:
+        """ Read stdin line by line """
         for line in sys.stdin:
-            split_string = re.split('- |"|"| " " ', str(line))
-            statusC_and_file_s = split_string[-1]
-            if counter != 0 and counter % 10 == 0:
-                printCodes(statusC_counter, file_size)
-            counter = counter + 1
+            if n_lines != 0 and n_lines % 10 == 0:
+                """ After every 10 lines, print from the beginning """
+                print_results(statusCodes, fileSize)
+            n_lines += 1
+            data = line.split()
             try:
-                statusC = int(statusC_and_file_s.split()[0])
-                f_size = int(statusC_and_file_s.split()[1])
-                # print("Status Code {} size {}".format(statusC, f_size))
-                if statusC in statusC_counter:
-                    statusC_counter[statusC] += 1
-                file_size = file_size + f_size
+                """ Compute metrics """
+                statusCode = data[-2]
+                if statusCode in statusCodes:
+                    statusCodes[statusCode] += 1
+                fileSize += int(data[-1])
             except:
                 pass
-        printCodes(statusC_counter, file_size)
+        print_results(statusCodes, fileSize)
     except KeyboardInterrupt:
-        printCodes(statusC_counter, file_size)
+        """ Keyboard interruption, print from the beginning """
+        print_results(statusCodes, fileSize)
         raise
