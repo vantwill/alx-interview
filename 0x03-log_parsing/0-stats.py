@@ -1,47 +1,46 @@
 #!/usr/bin/python3
-""" script that reads stdin line by line and computes metrics """
+""" parses logs """
 
-if __name__ == '__main__':
 
-    import sys
+import sys
 
-    def print_results(statusCodes, fileSize):
-        """ printing function with well formated """
-        print("File size: {:d}".format(fileSize))
-        for statusCode, times in sorted(statusCodes.items()):
-            if times:
-                print("{:s}: {:d}".format(statusCode, times))
 
-    statusCodes = {"200": 0,
-                   "301": 0,
-                   "400": 0,
-                   "401": 0,
-                   "403": 0,
-                   "404": 0,
-                   "405": 0,
-                   "500": 0
-                   }
-    fileSize = 0
-    n_lines = 0
-
+def main():
+    """ main func """
+    total_file_size = 0
+    status_codes_count_map = {"200": 0, "301": 0, "400": 0, "401": 0,
+                              "403": 0, "404": 0, "405": 0, "500": 0}
     try:
-        """ Read stdin line by line """
+        count = 0
         for line in sys.stdin:
-            if n_lines != 0 and n_lines % 10 == 0:
-                """ After every 10 lines, print from the beginning """
-                print_results(statusCodes, fileSize)
-            n_lines += 1
-            data = line.split()
-            try:
-                """ Compute metrics """
-                statusCode = data[-2]
-                if statusCode in statusCodes:
-                    statusCodes[statusCode] += 1
-                fileSize += int(data[-1])
-            except:
-                pass
-        print_results(statusCodes, fileSize)
+            count += 1
+            tokens = line.split()
+            if len(tokens):
+                try:
+                    total_file_size += int(tokens[-1])
+                    status_codes_count_map[tokens[-2]] += 1
+                except Exception:
+                    pass
+                if count == 10:
+                    count = 0
+                    print_report(
+                        status_codes_count_map,
+                        total_file_size
+                    )
+        print_report(status_codes_count_map, total_file_size)
+
     except KeyboardInterrupt:
-        """ Keyboard interruption, print from the beginning """
-        print_results(statusCodes, fileSize)
+        print_report(status_codes_count_map, total_file_size)
         raise
+
+
+def print_report(dct_, file_size):
+    """ prints to stdout summary of logs """
+    print("File size: {}".format(file_size))
+    for key in sorted(dct_.keys()):
+        if dct_.get(key):
+            print("{}: {}".format(key, dct_[key]))
+
+
+if __name__ == "__main__":
+    main()
