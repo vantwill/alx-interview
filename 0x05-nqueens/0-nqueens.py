@@ -1,80 +1,70 @@
 #!/usr/bin/python3
 """
-The N queens puzzle is the challenge of placing N non-attacking queens
-on an NxN chessboard. Write a program that solves the N queens problem.
-    Usage: nqueens N
-        If the user called the program with the wrong number of arguments,
-        print Usage: nqueens N, followed by a new line,
-        and exit with the status 1
-    where N must be an integer greater or equal to 4
-        If N is not an integer, print N must be a number,
-        followed by a new line, and exit with the status 1.
-        If N is smaller than 4, print N must be at least 4,
-        followed by a new line, and exit with the status 1.
-    The program should print every possible solution to the problem
-        One solution per line
-        Format: see example
-        You don't have to print the solutions in a specific order
-    You are only allowed to import the sys module
+Module for 0x0C. N Queens.
+Holberton School
+Specializations - Interview Preparation ― Algorithms
 """
-import sys
-
-
-if len(sys.argv) < 2:
-    print("Usage: nqueens N")
-    sys.exit(1)
-
-try:
-    num = int(sys.argv[1])
-except ValueError:
-    print("N must be a number")
-    sys.exit(1)
-
-if num < 4:
-    print("N must be at least 4")
-    sys.exit(1)
+from sys import argv, exit
 
 
 def solveNQueens(n):
-    """
-    Places N non-attacking queens on an NxN chessboard.
-    """
-    col, pos, neg = set(), set(), set()
-    current_board = [[] for n in range(n)]
-    solved_board = []
+    """Program that solves the N queens problem"""
+    res = []
+    queens = [-1] * n
+    # queens is a one-dimension array, like [1, 3, 0, 2] means
+    # index represents row no and value represents col no
 
-    def backtrack(row):
-        """
-        Tool for solving constraint satisfaction problems.
-        """
-        if row == n:
-            copy = current_board.copy()
-            solved_board.append(copy)
-            return
+    def dfs(index):
+        """Recursively resolves the N queens problem"""
+        if index == len(queens):  # n queens have been placed correctly
+            res.append(queens[:])
+            return  # backtracking
+        for i in range(len(queens)):
+            queens[index] = i
+            if valid(index):  # pruning
+                dfs(index + 1)
 
-        for c in range(n):
-            if c in col or (row + c) in pos or (row - c) in neg:
-                continue
+    # check whether nth queens can be placed
+    def valid(n):
+        """Method that checks if a position in the board is valid"""
+        for i in range(n):
+            if abs(queens[i] - queens[n]) == n - i:  # same diagonal
+                return False
+            if queens[i] == queens[n]:  # same column
+                return False
+        return True
 
-            col.add(c)
-            pos.add(row + c)
-            neg.add(row - c)
+    # given queens = [1,3,0,2] this function returns
+    # [[0, 1], [1, 3], [2, 0], [3, 2]]
 
-            current_board[row] = [row, c]
+    def make_all_boards(res):
+        """Method that builts the List that be returned"""
+        actual_boards = []
+        for queens in res:
+            board = []
+            for row, col in enumerate(queens):
+                board.append([row, col])
+            actual_boards.append(board)
+        return actual_boards
 
-            backtrack(row + 1)
-
-            col.remove(c)
-            pos.remove(row + c)
-            neg.remove(row - c)
-            current_board[row] = []
-
-    backtrack(0)
-
-    return solved_board
+    dfs(0)
+    return make_all_boards(res)
 
 
 if __name__ == "__main__":
-    boards = solveNQueens(num)
-    for board in boards:
-        print(board)
+    if len(argv) < 2:
+        print('Usage: nqueens N')
+        exit(1)
+    try:
+        n = int(argv[1])
+    except ValueError:
+        print('N must be a number')
+        exit(1)
+
+    if n < 4:
+        print('N must be at least 4')
+        exit(1)
+    else:
+        result = solveNQueens(n)
+        for row in result:
+            print(row)
